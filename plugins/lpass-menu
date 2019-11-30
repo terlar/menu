@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+[[ "${TRACE}" ]] && set -o xtrace
+set -o errexit -o nounset -o pipefail
+
+# Executables
+NOTIFY_SEND="${NOTIFY_SEND:-notify-send}"
+LPASS="${LPASS:-lpass}"
+
+notify-unlock() {
+    "${NOTIFY_SEND}" -i unlock "$*" 'Copied password to clipboard...'
+}
+
+logged_in() {
+    [[ "$("${LPASS}" status)" =~ ^"Logged in as" ]]
+}
+
+gen_password_list() {
+    echo synchronize
+    logged_in && "${LPASS}" ls
+}
+
+main() {
+    if [[ -z "$*" ]]
+    then
+        gen_password_list
+    else
+        case "$1" in
+            synchronize)
+                coproc "${LPASS}" sync &>/dev/null;;
+            *)
+                local key
+                key="$(echo "$1" | grep -Po '(?<=\[id:\s)[0-9]+')"
+
+                coproc "${LPASS}" show "${key}" --password -c &>/dev/null
+                exec 1>&-
+                notify-unlock "$(echo "$1" | cut -d' ' -f1)"
+                gen_password_list;;
+        esac
+    fi
+}
+
+main "$@"
