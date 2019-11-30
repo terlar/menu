@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+VERSION=dev
+
+[[ "${TRACE}" ]] && set -o xtrace
+set -o errexit -o nounset -o pipefail
+
+# Executables
+IFNE="${IFNE:-ifne}"
+ROFI="${ROFI:-rofi}"
+FZF="${FZF:-fzf}"
+FZY="${FZY:-fzy}"
+
+has_cmd() {
+    command -v -- "$*" &>/dev/null
+}
+
+has_any_cmd() {
+    for cmd in "$@"
+    do
+        has_cmd "${cmd}" && return 0
+    done
+    return 1
+}
+
+is_graphical() {
+    [[ -n "${DISPLAY:-}" ]]
+}
+
+is_interactive() {
+    local fd=0 # stdin
+    [[ -t "${fd}" || -p /dev/stdin ]]
+}
+
+use_rofi() {
+    has_cmd "${ROFI}" && is_graphical
+}
+
+main() {
+    while getopts :htv opt
+    do
+        case "${opt}" in
+            h    ) man 1 menu
+                   return 0 ;;
+            t    ) set -o xtrace ;;
+            v    ) echo "${0##*/} ${VERSION}"
+                   return 0 ;;
+            '?'  ) echo "invalid option -- '${OPTARG}'" >&2
+                   return 1 ;;
+            :    ) echo "option requires an argument -- '${OPTARG}'" >&2
+                   return 1
+        esac
+    done
+    shift "$((OPTIND - 1))"
+
+    local menu_cmd="${1?menu COMMAND was not provided}"
+
+    if ! has_any_cmd "${ROFI}" "${FZY}" "${FZF}"
+    then
+        echo 'you need either rofi, fzy or fzf for the menu' >&2
+        return 1
+    fi
+
+    if ! has_cmd "${menu_cmd}"
+    then
+        echo "unknown command \`${menu_cmd}'" >&2
+        return 1
+    fi
+
+    if use_rofi
+    then
+        local modi
+        modi="$(echo "$*" | sed -r 's/(\S+)/\1:\1/g; s/\s/,/g')"
+        "${ROFI}" -modi "${modi}" -show "${menu_cmd}"
+    else
+        local cmd
+        has_cmd "${FZF}" && cmd="${FZF}"
+        has_cmd "${FZY}" && cmd="${FZY}"
+
+	local sel=""
+
+        while true
+        do
+            sel="$("${menu_cmd}" "${sel}" | grep . | "${IFNE}" "${cmd}"; true)"
+            [[ -n "${sel}" ]] || break
+        done
+    fi
+}
+
+main "$@"

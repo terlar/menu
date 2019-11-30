@@ -1,0 +1,21 @@
+#+TITLE: menu
+* NAME
+menu - menu loop
+* SYNOPSIS
+*menu* COMMAND
+* DESCRIPTION
+menu is a menu loop, it executes the provided /COMMAND/ and passes the output to a selection
+tool such as *rofi*, *fzy* or *fzf*. When an entry is selected with one of these tool, the
+selected line will be fed back into /COMMAND/ and the procedure continues in a loop until
+/COMMAND/ doesn't produce any output.
+
+** Dependencies
+- rofi :: for graphical menu
+- fzy/fzf, moreutils :: for terminal menu
+
+* OPTIONS
+  - -h :: print this help
+  - -v :: print version
+  - -t  :: trace the execution
+* AUTHORS
+Terje Larsen terlar@gmail.com
