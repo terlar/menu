@@ -56,9 +56,6 @@ in rec {
       substituteInPlace bin/menu --replace 'ROFI="''${ROFI:-rofi}"' "ROFI=${pkgs.rofi}/bin/rofi"
       substituteInPlace bin/menu --replace 'FZF="''${FZF:-fzf}"' "FZF=${pkgs.fzf}/bin/fzf"
       substituteInPlace bin/menu --replace 'FZY="''${FZY:-fzy}"' "FZY=${pkgs.fzy}/bin/fzy"
-
-      substituteInPlace bin/lpass-menu --replace 'NOTIFY_SEND="''${NOTIFY_SEND:-notify-send}"' "NOTIFY_SEND=${pkgs.libnotify}/bin/notify-send"
-      substituteInPlace bin/lpass-menu --replace 'LPASS="''${LPASS:-lpass}"' "LPASS=${pkgs.lastpass-cli}/bin/lpass"
     '';
 
     installPhase = ''
