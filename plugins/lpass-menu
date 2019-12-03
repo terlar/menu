@@ -15,19 +15,30 @@ logged_in() {
     [[ "$("${LPASS}" status)" =~ ^"Logged in as" ]]
 }
 
-gen_password_list() {
+gen_main_menu() {
     echo synchronize
+    echo +
     logged_in && "${LPASS}" ls
 }
 
 main() {
     if [[ -z "$*" ]]
     then
-        gen_password_list
+        gen_main_menu
     else
         case "$1" in
             synchronize)
-                coproc "${LPASS}" sync &>/dev/null;;
+                coproc "${LPASS}" sync &>/dev/null
+                gen_main_menu
+                ;;
+            '+ '*)
+                # shellcheck disable=SC2206
+                local cmd=($1)
+                unset 'cmd[0]'
+                local key="${cmd[*]}"
+                coproc "${LPASS}" add "${key}" >/dev/null 2>&1
+                exec 1>&-
+                ;;
             *)
                 local key
                 key="$(echo "$1" | grep -Po '(?<=\[id:\s)[0-9]+')"
@@ -35,7 +46,8 @@ main() {
                 coproc "${LPASS}" show "${key}" --password -c &>/dev/null
                 exec 1>&-
                 notify-unlock "$(echo "$1" | cut -d' ' -f1)"
-                gen_password_list;;
+                gen_main_menu
+                ;;
         esac
     fi
 }
