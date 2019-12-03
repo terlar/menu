@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+[[ "${TRACE}" ]] && set -o xtrace
+set -o errexit -o nounset -o pipefail
+
+# Executables
+FISH="${FISH:-fish}"
+NOTIFY_SEND="${NOTIFY_SEND:-notify-send}"
+
+notify_done() {
+    "${NOTIFY_SEND}" -i gtk-apply todo "$*"
+}
+
+gen_todos() {
+    "${FISH}" --command 'todo list'
+}
+
+gen_main_menu() {
+    echo edit
+    echo +
+    gen_todos
+}
+
+main() {
+    if [[ -z "$*" ]]
+    then
+        gen_main_menu
+    else
+        # shellcheck disable=SC2206
+        local cmd=($1)
+        case "${cmd[0]}" in
+            '+')
+                unset 'cmd[0]'
+                "${FISH}" -c "todo add ${cmd[*]}" >/dev/null 2>&1
+                gen_main_menu
+                ;;
+            edit)
+                coproc "${FISH}" -c 'todo edit &' >/dev/null 2>&1
+                exec 1>&-
+                ;;
+            *)
+                local result
+                result="$("${FISH}" -c "todo done ${cmd[*]}")"
+                notify_done "${result}"
+                gen_main_menu
+                ;;
+        esac
+    fi
+}
+
+main "$@"
