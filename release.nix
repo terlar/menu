@@ -1,7 +1,6 @@
-{ pkgsPath ? ./nixpkgs.nix }:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
-  pkgs = import pkgsPath {};
   version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./.version);
   releaseName = "menu-${version}";
 in rec {

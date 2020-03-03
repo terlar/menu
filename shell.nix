@@ -1,8 +1,7 @@
-{ pkgsPath ? ./nixpkgs.nix }:
+{ pkgs ? import ./nixpkgs.nix {} }:
 
 let
-  pkgs = import pkgsPath {};
-  drv = import ./. { inherit pkgsPath; };
+  drv = import ./. { inherit pkgs; };
 in pkgs.mkShell {
   buildInputs = [pkgs.man pkgs.less pkgs.fish drv];
 }

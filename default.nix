@@ -1,5 +1,5 @@
-{ pkgsPath ? ./nixpkgs.nix }:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
-  release = import ./release.nix { inherit pkgsPath; };
+  release = import ./release.nix { inherit pkgs; };
 in release.build
