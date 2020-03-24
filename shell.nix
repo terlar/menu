@@ -1,4 +1,4 @@
-{ pkgs ? import ./nixpkgs.nix {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
   drv = import ./. { inherit pkgs; };
