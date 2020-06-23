@@ -8,11 +8,5 @@ See [[doc/menu.org][manpage]].
 To test the command you can open a shell with Nix and then the command =menu= will be
 available.
 #+BEGIN_SRC sh
-nix-shell --run 'menu -v'
-#+END_SRC
-
-* Installation
-Preferred installation method is with Nix:
-#+BEGIN_SRC sh
-nix-env -if .
+nix dev-shell
 #+END_SRC
