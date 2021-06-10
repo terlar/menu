@@ -1,8 +1,8 @@
-{ stdenv, emacs, moreutils }:
+{ lib, stdenv, emacs, moreutils }:
 
 stdenv.mkDerivation rec {
   pname = "menu";
-  version = stdenv.lib.strings.fileContents ./.version;
+  version = lib.strings.fileContents ./.version;
 
   src = ./.;
 
@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
     cp doc/menu.man $out/share/man/man1
   '';
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "A menu loop used to create custom menus from command line tools.";
     homepage = "https://github.com/terlar/menu";
     license = licenses.mit;
